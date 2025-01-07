@@ -1,0 +1,12 @@
+{
+  "author": "Geoffrey Hutchison",
+  "version": 0.1,
+  "url": "https://github.com/ghutchis/avogadro-mattersim",
+  "name": "avogadro-mattersim",
+  "description": "Energy calculator using MatterSim ML potentials",
+  "type": "energy",
+  "commands": [
+    { "name": "MatterSim-1m", "command": "mattersim-1m.py" },
+    { "name": "MatterSim-5m", "command": "mattersim-5m.py" }
+   ]
+}
