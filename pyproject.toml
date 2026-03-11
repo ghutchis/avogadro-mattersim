@@ -1,6 +1,6 @@
 [project]
 authors = [{name = "Geoffrey Hutchison", email = "geoff.hutchison@gmail.com"}]
-dependencies = []
+dependencies = ["mattersim>=1.2.1,<2"]
 license = "BSD-3-Clause"
 name = "avogadro-mattersim"
 requires-python = ">= 3.11"
@@ -49,6 +49,5 @@ platforms = ["win-64", "linux-64", "linux-aarch64", "osx-arm64"]
 
 [tool.pixi.pypi-dependencies]
 avogadro_mattersim = { path = ".", editable = true }
-mattersim = "*"
 
 [tool.pixi.tasks]
