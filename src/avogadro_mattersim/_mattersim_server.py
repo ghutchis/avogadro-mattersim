@@ -9,7 +9,7 @@ import numpy as np
 from ase import Atoms
 from ase.cell import Cell
 
-from .energy import EnergyServer
+from avogadro.energy import EnergyServer
 
 # eV -> kJ/mol
 _EV_TO_KJ_MOL = 96.4853321

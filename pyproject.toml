@@ -1,6 +1,6 @@
 [project]
 authors = [{name = "Geoffrey Hutchison", email = "geoff.hutchison@gmail.com"}]
-dependencies = ["mattersim>=1.2.1,<2"]
+dependencies = ["avogadro>=2.0", "mattersim>=1.2.1,<2"]
 license = "BSD-3-Clause"
 name = "avogadro-mattersim"
 requires-python = ">= 3.11"
