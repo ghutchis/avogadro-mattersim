@@ -43,20 +43,48 @@ jobs:
         if: steps.lock.outputs.tracked == 'true'
         run: pixi lock
 
-      - uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
+      # Commit to a fixed branch and open (or refresh) one pull request with
+      # the gh CLI, which is preinstalled on GitHub runners. The repository
+      # must allow GitHub Actions to create pull requests (Settings > Actions >
+      # General > Workflow permissions).
+      - name: Open or update the pull request
         if: steps.bump.outputs.changed == 'true'
-        with:
-          branch: update-dependencies
-          delete-branch: true
-          add-paths: ${{ steps.lock.outputs.tracked == 'true' && 'pyproject.toml,pixi.lock' || 'pyproject.toml' }}
-          commit-message: |
-            Bump to ${{ steps.bump.outputs.version }} for new dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.ref_name }}
+          BRANCH: update-dependencies
+          VERSION: ${{ steps.bump.outputs.version }}
+          SUMMARY: ${{ steps.bump.outputs.summary }}
+          LOCK_TRACKED: ${{ steps.lock.outputs.tracked }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-            ${{ steps.bump.outputs.summary }}
-          title: Bump to ${{ steps.bump.outputs.version }} (${{ steps.bump.outputs.summary }})
-          body: |
-            New releases: ${{ steps.bump.outputs.summary }}.
+          git switch -C "$BRANCH"
+          git add pyproject.toml
+          if [ "$LOCK_TRACKED" = "true" ]; then
+            git add pixi.lock
+          fi
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          git commit -m "Bump to $VERSION for new dependencies" -m "$SUMMARY"
+          # The branch is regenerated from the base on every run.
+          git push --force origin "$BRANCH"
 
-            Test the plugin with the new release before merging. Once merged,
-            the Avogadro plugin index picks up the new commit and installed
-            copies show "Update available".
+          title="Bump to $VERSION ($SUMMARY)"
+          body="New releases: $SUMMARY.
+
+          Test the plugin with the new release before merging. Once merged,
+          the Avogadro plugin index picks up the new commit and installed
+          copies show \"Update available\"."
+
+          existing=$(gh pr list --head "$BRANCH" --base "$BASE" --state open \
+            --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --title "$title" --body "$body"
+          else
+            gh pr create --base "$BASE" --head "$BRANCH" \
+              --title "$title" --body "$body"
+          fi
