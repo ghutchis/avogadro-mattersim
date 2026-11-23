@@ -15,12 +15,13 @@ from avogadro.energy import EnergyServer
 _EV_TO_KJ_MOL = 96.4853321
 
 
-def run_mattersim_server(mol_cjson: dict, calc) -> None:
+def run_mattersim_server(mol_cjson: dict, calc, protocol_out) -> None:
     """Run the binary-protocol EnergyServer loop for a MatterSim calculator.
 
     Args:
         mol_cjson: the "cjson" sub-object from the Avogadro bootstrap JSON.
         calc: an ASE calculator (MatterSimCalculator instance).
+        protocol_out: binary stream for response frames (see _stdio).
     """
     atom_numbers = np.array(mol_cjson["atoms"]["elements"]["number"])
     coord_list = mol_cjson["atoms"]["coords"]["3d"]
@@ -51,7 +52,7 @@ def run_mattersim_server(mol_cjson: dict, calc) -> None:
 
     atoms.calc = calc
 
-    with EnergyServer(sys.stdin.buffer, sys.stdout.buffer, num_atoms) as server:
+    with EnergyServer(sys.stdin.buffer, protocol_out, num_atoms) as server:
         for request in server.requests():
             atoms.set_positions(request.coords[keep])
 

@@ -12,21 +12,21 @@ import sys
 import warnings
 
 import torch
-from loguru import logger
 from mattersim.forcefield import MatterSimCalculator
 
+from ._logging import quiet_logging
 from ._mattersim_server import run_mattersim_server
 
 # don't use MPS on Apple yet
 _DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def run():
+def run(protocol_out):
     bootstrap = json.loads(sys.stdin.buffer.readline())
     mol_cjson = bootstrap["cjson"]
 
-    logger.remove(0)
+    quiet_logging()
     warnings.filterwarnings("ignore", category=UserWarning)
     calc = MatterSimCalculator(load_path="MatterSim-v1.0.0-5M.pth", device=_DEVICE)
 
-    run_mattersim_server(mol_cjson, calc)
+    run_mattersim_server(mol_cjson, calc, protocol_out)
